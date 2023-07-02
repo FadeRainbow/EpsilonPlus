@@ -31,7 +31,6 @@ object ModuleManager : Helper {
         InfoHUD.register()
         NotificationRender.register()
         RootGUI.register()
-        Test.register()
         //Combat
         AimAssist.register()
         AimBot.register()
@@ -42,7 +41,6 @@ object ModuleManager : Helper {
         AutoCev.register()
         AutoCity.register()
         AutoClicker.register()
-        ZealotCrystalTwo.register()
         AutoHoleFill.register()
         AutoLog.register()
         AutoMend.register()
@@ -64,7 +62,6 @@ object ModuleManager : Helper {
         AntiCrasher.register()
         AntiWeather.register()
         AutoFish.register()
-//        AutoObsidian.register()
         AutoPorn.register()
         AutoReconnect.register()
         AutoRespawn.register()
@@ -83,7 +80,6 @@ object ModuleManager : Helper {
 
         //Movement
         AntiHunger.register()
-//        AntiLevitation.register()
         AntiWeb.register()
         AutoCenter.register()
         AutoJump.register()
@@ -105,7 +101,6 @@ object ModuleManager : Helper {
         Speed.register()
         Sprint.register()
         Step.register()
-//        Strafe.register()
         Velocity.register()
 
         //Player
@@ -161,6 +156,13 @@ object ModuleManager : Helper {
         //Spartan
         EnergyShield.register()
 
+        //setting
+        CombatSetting.register()
+        FontSetting.register()
+        GuiSetting.register()
+        MenuSetting.register()
+        TextSetting.register()
+        ThemeSetting.register()
 
         modules.sortBy { it.name }
         hudModules.sortBy { it.name }

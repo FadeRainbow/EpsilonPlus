@@ -58,7 +58,7 @@ object CombatInfo : HUDModule(name = "CombatInfo", category = Category.InfoHUD, 
         startY += 2
 
         if (moduleCheck) {
-            if (checkAutoCrystal) drawModuleCheck("AutoCrystal: ") { ZealotCrystalTwo.isEnabled || ZealotCrystalPlus.isEnabled }
+            if (checkAutoCrystal) drawModuleCheck("AutoCrystal: ") {  ZealotCrystalPlus.isEnabled }
             if (checkSurround) drawModuleCheck("Surround: ") { Surround.isEnabled }
             if (checkAutoTrap) drawModuleCheck("Trap: ") { AutoTrap.isEnabled }
             if (checkHeadCrystal) drawModuleCheck("AutoCEV: ") { AutoCev.isEnabled }

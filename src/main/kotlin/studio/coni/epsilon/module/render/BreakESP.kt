@@ -17,75 +17,62 @@ import net.minecraft.client.renderer.Tessellator
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import org.lwjgl.opengl.GL11
+import studio.coni.epsilon.event.events.Render2DEvent
+import studio.coni.epsilon.event.events.Render3DEvent
+import studio.coni.epsilon.event.listener
+import studio.coni.epsilon.event.safeListener
+import studio.coni.epsilon.util.ColorRGB
+import studio.coni.epsilon.util.graphics.ESPRenderer
+import kotlin.math.max
 import kotlin.math.pow
 
 object BreakESP :
     Module(name = "BreakESP", category = Category.Render, description = "Display brock breaking progress") {
 
-    private val mode by setting("Mode", Mode.Own)
-    private val alpha by setting("Alpha", 127, 0..255, 1)
-    private val showPercentage by setting("Show Percentage", true)
-    private val showAnimation by setting("Show Animation", true)
+    private val self by setting("Self", true)
+    private val other by setting("Other", true)
+    private val boxColor by setting("BoxColor", ColorRGB(200, 205, 210))
+    private val textColor by setting("TextColor", ColorRGB(255, 255, 255))
+    private val aFilled by setting("Filled Alpha", 31, 0..255, 1)
+    private val aOutline by setting("Outline Alpha", 255, 0..255, 1)
 
 
-    enum class Mode {
-        Own, Other, All
-    }
+    private val renderer = ESPRenderer()
 
     init {
-        onRender2D {
-           runSafe {
-                if (!showPercentage) return@runSafe
+        safeListener<Render2DEvent> {
 
-                for (progress in mc.renderGlobal.getDamagedBlocks.values) {
-                    if (isInvalidBreaker(progress)) continue
+            for (progress in mc.renderGlobal.damagedBlocks.values) {
+                if (isInvalidBreaker(progress)) continue
 
-                    val text = "${(progress.partialBlockDamage + 1) * 10} %"
-                    val center = getBoundingBox(progress.position).center
-                    val screenPos = ProjectionUtils.toScreenPosScaled(center)
-                    val distFactor = (ProjectionUtils.distToCamera(center) - 1.0).coerceAtLeast(0.0)
-                    val scale = (3.0f / 2.0.pow(distFactor).toFloat()).coerceAtLeast(0.5f)
+                val text = "${(progress.partialBlockDamage + 1) * 10} %"
+                val center = getBoundingBox(progress.position).center
+                val screenPos = ProjectionUtils.toAbsoluteScreenPos(center)
+                val distFactor = max(ProjectionUtils.distToCamera(center) - 1.0, 0.0)
+                val scale = max(6.0f / 2.0.pow(distFactor).toFloat(), 1.0f)
 
-                    GL11.glPushMatrix()
-                    GL11.glTranslated(screenPos.x, screenPos.y, 0.0)
-                    GL11.glScalef(scale, scale, 1.0f)
-                    MainFontRenderer.drawCenteredString(text, 0.0f, 0.0f, GUIManager.white, 1f, true)
-                    GL11.glPopMatrix()
-                }
+                val x = MainFontRenderer.getWidth(text, scale) * -0.5f
+                val y = MainFontRenderer.getHeight(scale) * -0.5f
+                MainFontRenderer.drawString(text, screenPos.x.toFloat() + x, screenPos.y.toFloat() + y, scale = scale, color = textColor )
             }
         }
 
-        onRender3D {
-            runSafe {
-                val buffer = Tessellator.getInstance().buffer
-                buffer.setTranslation(-mc.renderManager.renderPosX, -mc.renderManager.renderPosY, -mc.renderManager.renderPosZ)
+        safeListener<Render3DEvent> {
+            renderer.aOutline = aOutline
+            renderer.aFilled = aFilled
 
-                for (progress in mc.renderGlobal.getDamagedBlocks.values) {
-                    if (isInvalidBreaker(progress)) continue
-                    val box = getBoundingBox(progress.position, progress.partialBlockDamage + 1)
-                    studio.coni.epsilon.util.graphics.RenderUtils3D.drawBoundingFilledBox(box, GUIManager.firstColor.r, GUIManager.firstColor.g, GUIManager.firstColor.b, alpha)
-                }
-
-                buffer.setTranslation(0.0, 0.0, 0.0)
+            for (progress in mc.renderGlobal.damagedBlocks.values) {
+                if (isInvalidBreaker(progress)) continue
+                val box = getBoundingBox(progress.position, progress.partialBlockDamage + 1)
+                renderer.add(box, boxColor)
             }
-        }
-    }
 
-    private fun isInvalidBreaker(progress: DestroyBlockProgress): Boolean {
-        val breakerID = progress.entityID
-        return when (mode) {
-            Mode.Own -> breakerID != mc.player.entityId
-            Mode.Other -> breakerID == mc.player.entityId
-            else -> false
+            renderer.render(true)
         }
     }
 
     private fun SafeClientEvent.getBoundingBox(pos: BlockPos, progress: Int): AxisAlignedBB {
-        return if (!showAnimation) {
-            return getBoundingBox(pos)
-        } else {
-            getBoundingBox(pos).scale(progress / 10.0)
-        }
+        return getBoundingBox(pos).scale(progress / 10.0)
     }
 
 
@@ -93,4 +80,13 @@ object BreakESP :
         return world.getSelectedBox(pos)
     }
 
+    private fun isInvalidBreaker(progress: DestroyBlockProgress): Boolean {
+        val breakerID = progress.entityID
+
+        return if (breakerID == mc.player?.entityId) {
+            !self
+        } else {
+            !other
+        }
+    }
 }

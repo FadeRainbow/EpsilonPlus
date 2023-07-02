@@ -32,14 +32,14 @@ object MenuSetting : Module(
 
     private val mode = setting(
         "ShaderMode",
-        ShaderMode.Random,
+        ShaderMode.Specified,
         "Use the specified shader or randomly",
         background.atValue(Background.Shader)
     )
 
     private val shader = setting(
         "Shader",
-        Shader.GreenNebula,
+        Shader.DayNightSwitches,
         "Specify a shader",
         background.atValue(Background.Shader) and mode.atValue(ShaderMode.Specified)
     ).listen {

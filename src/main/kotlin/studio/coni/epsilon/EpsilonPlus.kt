@@ -24,7 +24,7 @@ object EpsilonPlus {
 
     const val MOD_NAME = "Epsilon+"
     const val MOD_ID = "epsilon"
-    const val VERSION = "4.1u230128"
+    const val VERSION = "4.1.1"
 
     const val INFO = "$MOD_NAME Build $VERSION - Epsilon Plus"
 

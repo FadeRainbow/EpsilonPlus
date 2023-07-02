@@ -74,6 +74,7 @@ object Nametags : Module(name = "Nametags", category = Category.Render, descript
                 if (nameTags.isNotEmpty()) {
                     for (nameTag in nameTags) {
                         nameTag.draw(event)
+
                     }
                 }
             }
